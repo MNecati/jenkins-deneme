@@ -1,28 +1,43 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'jenkins-deneme-image'
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-                // GitHub repository'nizi klonluyoruz
-                git 'https://github.com/MNecati/jenkins-deneme.git'
+                git branch: 'main', url: 'https://github.com/MNecati/jenkins-deneme.git'
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Docker image oluşturuyoruz
-                    def image = docker.build("jenkins-deneme:latest")
+                    dockerImage = docker.build("${DOCKER_IMAGE}")
                 }
             }
         }
+
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Docker container çalıştırıyoruz
-                    docker.image("jenkins-deneme:latest").run('-d -p 5000:5000')
+                    dockerImage.run("-p 5000:5000")
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
