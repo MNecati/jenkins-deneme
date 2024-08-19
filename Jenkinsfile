@@ -65,6 +65,7 @@ pipeline {
                           containers:
                           - name: flask-app
                             image: 192.168.232.127:5000/my-flask-app:latest
+                        //Registery olmassa my-flask-app üzerinden gidebiliriz.
                             ports:
                             - containerPort: 8081
                     " > deployment.yaml
