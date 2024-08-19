@@ -1,27 +1,26 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_REGISTRY = 'http://localhost:5000'
-        DOCKER_IMAGE_NAME = 'your-image-name'
-        DOCKER_IMAGE_TAG = 'latest'
-    }
-
     stages {
+        stage('Clone Repository') {
+            steps {
+                // GitHub repository'nizi klonluyoruz
+                git 'https://github.com/MNecati/jenkins-deneme.git'
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
-                    def customImage = docker.build("${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
+                    // Docker image oluşturuyoruz
+                    def image = docker.build("jenkins-deneme:latest")
                 }
             }
         }
-
-        stage('Push Docker Image') {
+        stage('Run Docker Container') {
             steps {
                 script {
-                    docker.withRegistry("${DOCKER_REGISTRY}") {
-                        docker.image("${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}").push("${DOCKER_IMAGE_TAG}")
-                    }
+                    // Docker container çalıştırıyoruz
+                    docker.image("jenkins-deneme:latest").run('-d -p 5000:5000')
                 }
             }
         }
