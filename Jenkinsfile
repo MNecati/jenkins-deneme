@@ -20,7 +20,7 @@ pipeline {
                     // Docker image'ı oluşturma
                     dockerImage = docker.build("my-flask-app")
                     // Image'i local registry'ye tag'leme
-                    sh "docker tag my-flask-app localhost:5000/my-flask-app:latest"
+                    sh "docker tag my-flask-app 192.168.232.127:5000/my-flask-app:latest"
                 }
             }
         }
@@ -29,12 +29,12 @@ pipeline {
             steps {
                 script {
                     // Docker image'ın registry'de olup olmadığını kontrol etme
-                    def imageExists = sh(script: "curl -s http://localhost:5000/v2/my-flask-app/tags/list | grep -w latest", returnStatus: true)
+                    def imageExists = sh(script: "curl -s http://192.168.232.127:5000/v2/my-flask-app/tags/list | grep -w latest", returnStatus: true)
                     if (imageExists == 0) {
                         echo "Image already exists in registry. Skipping push."
                     } else {
                         // Docker image'ı registry'ye push etme
-                        sh "docker push localhost:5000/my-flask-app:latest"
+                        sh "docker push 192.168.232.127:5000/my-flask-app:latest"
                     }
                 }
             }
@@ -64,7 +64,7 @@ pipeline {
                         spec:
                           containers:
                           - name: flask-app
-                            image: localhost:5000/my-flask-app:latest
+                            image: 192.168.232.127:5000/my-flask-app:latest
                             ports:
                             - containerPort: 8081
                     " > deployment.yaml
@@ -88,7 +88,7 @@ pipeline {
     post {
         always {
             // Pipeline işlemi tamamlandığında kullanıcıya bilgi verme
-            echo 'Deployment işlemi tamamlandı. Uygulama http://localhost:8081 adresinden erişilebilir.'
+            echo 'Deployment işlemi tamamlandı. Uygulama http://192.168.232.127:8081 adresinden erişilebilir.'
         }
     }
 }
