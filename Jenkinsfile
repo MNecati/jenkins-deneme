@@ -1,29 +1,28 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'jenkins-deneme-image'
-    }
-
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/MNecati/jenkins-deneme.git'
+                // Kaynak kodu bu repodan çek
+                git url: 'https://github.com/MNecati/jenkins-deneme.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
+                // Docker imajını oluştur
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}")
+                    dockerImage = docker.build("my-flask-app")
                 }
             }
         }
 
         stage('Run Docker Container') {
             steps {
+                // Docker konteynerını başlat
                 script {
-                    dockerImage.run("-p 5000:5000")
+                    dockerImage.run('-d -p 8081:8081 --name flask-app')
                 }
             }
         }
@@ -31,13 +30,8 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished.'
-        }
-        success {
-            echo 'Pipeline completed successfully.'
-        }
-        failure {
-            echo 'Pipeline failed.'
+            // Uygulama çalıştıktan sonra mesajı göster
+            echo 'Uygulama çalışıyor, şu adresten erişebilirsiniz: http://localhost:8081'
         }
     }
 }
