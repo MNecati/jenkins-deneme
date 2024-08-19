@@ -45,7 +45,7 @@ pipeline {
                 script {
                     // Deployment manifest dosyasını oluşturma
                     sh '''
-                    cat <<EOF > deployment.yaml
+                    echo "
                     apiVersion: apps/v1
                     kind: Deployment
                     metadata:
@@ -67,9 +67,9 @@ pipeline {
                             image: localhost:5000/my-flask-app:latest
                             ports:
                             - containerPort: 8081
-                    EOF
+                    " > deployment.yaml
                     '''
-                    // YAML dosyasının içeriğini doğrulamak için ekleme
+                    // YAML dosyasının içeriğini kontrol etme
                     sh 'cat deployment.yaml'
                 }
             }
