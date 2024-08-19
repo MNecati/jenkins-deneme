@@ -40,10 +40,10 @@ pipeline {
             }
         }
 
-        stage('Create Deployment File') {
+        stage('Create Deployment and Service File') {
             steps {
                 script {
-                    // Deployment manifest dosyasını oluşturma
+                    // Deployment ve Service manifest dosyalarını oluşturma
                     sh '''
                     echo "
                     apiVersion: apps/v1
@@ -66,11 +66,27 @@ pipeline {
                           - name: flask-app
                             image: 192.168.232.127:5000/my-flask-app:latest
                             ports:
-                            - containerPort: 8081
+                            - containerPort: 8082
                     " > deployment.yaml
+
+                    echo "
+                    apiVersion: v1
+                    kind: Service
+                    metadata:
+                      name: flask-app-service
+                    spec:
+                      type: NodePort
+                      ports:
+                        - port: 8082
+                          targetPort: 8082
+                          nodePort: 30001
+                      selector:
+                        app: flask-app
+                    " > service.yaml
                     '''
-                    // YAML dosyasının içeriğini kontrol etme
+                    // YAML dosyalarının içeriğini kontrol etme
                     sh 'cat deployment.yaml'
+                    sh 'cat service.yaml'
                 }
             }
         }
@@ -80,6 +96,7 @@ pipeline {
                 script {
                     // Kubernetes'e deploy etme
                     sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl apply -f service.yaml'
                 }
             }
         }
@@ -88,7 +105,7 @@ pipeline {
     post {
         always {
             // Pipeline işlemi tamamlandığında kullanıcıya bilgi verme
-            echo 'Deployment işlemi tamamlandı. Uygulama http://192.168.232.127:8081 adresinden erişilebilir.'
+            echo 'Deployment işlemi tamamlandı. Uygulama http://192.168.232.127:30001 adresinden erişilebilir.'
         }
     }
 }
