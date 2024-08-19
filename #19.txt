@@ -1,0 +1,202 @@
+Started by user necati
+Obtained Jenkinsfile from git https://github.com/MNecati/jenkins-deneme.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/testt
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/testt/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/MNecati/jenkins-deneme.git # timeout=10
+Fetching upstream changes from https://github.com/MNecati/jenkins-deneme.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+ > git fetch --tags --force --progress -- https://github.com/MNecati/jenkins-deneme.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 48bf8100d47826e2c2f91cc4e75f97ae1bc68254 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 48bf8100d47826e2c2f91cc4e75f97ae1bc68254 # timeout=10
+Commit message: "Update Jenkinsfile"
+ > git rev-list --no-walk 1004922a7e77b04541d86404e9793577f2d0a670 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] git
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/testt/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/MNecati/jenkins-deneme.git # timeout=10
+Fetching upstream changes from https://github.com/MNecati/jenkins-deneme.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+ > git fetch --tags --force --progress -- https://github.com/MNecati/jenkins-deneme.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 48bf8100d47826e2c2f91cc4e75f97ae1bc68254 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 48bf8100d47826e2c2f91cc4e75f97ae1bc68254 # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D main # timeout=10
+ > git checkout -b main 48bf8100d47826e2c2f91cc4e75f97ae1bc68254 # timeout=10
+Commit message: "Update Jenkinsfile"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build Docker Image)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker build -t my-flask-app .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 148B done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.9-slim
+#2 DONE 1.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B 0.0s done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.9-slim@sha256:1e3437daae1d9cebce372794eacfac254dd108200e47c8b7f56a633ebd3e2a0a
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 28B done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY app.py /app
+#7 CACHED
+
+#8 [4/4] RUN pip install Flask
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 writing image sha256:5a512b1319731788a677388096c5921e1b6635b1b5141c6d55f6920fc3360529 0.0s done
+#9 naming to docker.io/library/my-flask-app
+#9 naming to docker.io/library/my-flask-app 0.0s done
+#9 DONE 0.1s
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] sh
++ docker tag my-flask-app 192.168.232.127:5000/my-flask-app:latest
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push Docker Image)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ curl -s http://192.168.232.127:5000/v2/my-flask-app/tags/list
++ grep -w latest
+{"name":"my-flask-app","tags":["latest"]}
+[Pipeline] echo
+Image already exists in registry. Skipping push.
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Create Deployment File)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ echo 
+                    apiVersion: apps/v1
+                    kind: Deployment
+                    metadata:
+                      name: flask-app
+                      labels:
+                        app: flask-app
+                    spec:
+                      replicas: 1
+                      selector:
+                        matchLabels:
+                          app: flask-app
+                      template:
+                        metadata:
+                          labels:
+                            app: flask-app
+                        spec:
+                          containers:
+                          - name: flask-app
+                            image: 192.168.232.127:5000/my-flask-app:latest
+                            ports:
+                            - containerPort: 8081
+                    
+[Pipeline] sh
++ cat deployment.yaml
+
+                    apiVersion: apps/v1
+                    kind: Deployment
+                    metadata:
+                      name: flask-app
+                      labels:
+                        app: flask-app
+                    spec:
+                      replicas: 1
+                      selector:
+                        matchLabels:
+                          app: flask-app
+                      template:
+                        metadata:
+                          labels:
+                            app: flask-app
+                        spec:
+                          containers:
+                          - name: flask-app
+                            image: 192.168.232.127:5000/my-flask-app:latest
+                            ports:
+                            - containerPort: 8081
+                    
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy to Kubernetes)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ kubectl apply -f deployment.yaml
+deployment.apps/flask-app configured
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Deployment iÅlemi tamamlandÄ±. Uygulama http://192.168.232.127:8081 adresinden eriÅilebilir.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
