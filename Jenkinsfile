@@ -4,23 +4,29 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Kaynak kodu main branch'inden çek
                 git branch: 'main', url: 'https://github.com/MNecati/jenkins-deneme.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Docker imajını oluştur
                 script {
                     dockerImage = docker.build("my-flask-app")
+                    // Image'i local registry'e tag'le
+                    sh "docker tag my-flask-app localhost:5000/my-flask-app"
                 }
+            }
+        }
+
+        stage('Push to Local Registry') {
+            steps {
+                // Image'i local registry'e push et
+                sh "docker push localhost:5000/my-flask-app"
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                // Docker konteynerını başlat
                 script {
                     dockerImage.run('-d -p 8081:8081 --name flask-app')
                 }
@@ -30,7 +36,6 @@ pipeline {
 
     post {
         always {
-            // Uygulama çalıştıktan sonra mesajı göster
             echo 'Uygulama çalışıyor, şu adresten erişebilirsiniz: http://localhost:8081'
         }
     }
