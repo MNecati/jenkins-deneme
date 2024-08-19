@@ -20,7 +20,7 @@ pipeline {
                     // Docker image'ı oluşturma
                     dockerImage = docker.build("my-flask-app")
                     // Image'i local registry'ye tag'leme
-                    sh "docker tag my-flask-app localhost:5000/my-flask-app"
+                    sh "docker tag my-flask-app localhost:5000/my-flask-app:latest"
                 }
             }
         }
@@ -34,7 +34,7 @@ pipeline {
                         echo "Image already exists in registry. Skipping push."
                     } else {
                         // Docker image'ı registry'ye push etme
-                        sh "docker push localhost:5000/my-flask-app"
+                        sh "docker push localhost:5000/my-flask-app:latest"
                     }
                 }
             }
