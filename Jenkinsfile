@@ -4,8 +4,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Kaynak kodu bu repodan çek
-                git url: 'https://github.com/MNecati/jenkins-deneme.git'
+                // Kaynak kodu main branch'inden çek
+                git branch: 'main', url: 'https://github.com/MNecati/jenkins-deneme.git'
             }
         }
 
